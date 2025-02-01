@@ -26,7 +26,6 @@ public class HotelResponseTbo {
     public static class Status {
         @JsonProperty("Code")
         private int code;
-
         @JsonProperty("Description")
         private String description;
     }

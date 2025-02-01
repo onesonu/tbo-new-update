@@ -1,25 +1,17 @@
 package com.fastays.tbo_hotel_search.service;
 
 import com.fastays.tbo_hotel_search.dto.request.HotelRequest;
-import com.fastays.tbo_hotel_search.dto.request.response.HotelResponse;
 import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseTbo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
 import freemarker.template.Configuration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -52,15 +44,17 @@ public class HotelService {
         try {
             ResponseEntity<HotelResponseTbo> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, HotelResponseTbo.class);
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+
                 hotelResponseTbo = response.getBody();
+
                 HotelResponseTbo.Status sts = hotelResponseTbo.getStatus();
                 model.put("Status", sts);
 
                 if (sts.getCode() != 200) { // assuming a non-200 code indicates error
-                    Map<String, Object> errorMap = new HashMap<>();
-                    errorMap.put("errorCode", sts.getCode());
-                    errorMap.put("errorMessage", sts.getDescription());
-                    model.put("error", errorMap);
+                    Map<String, Object> errorMapforsts = new HashMap<>();
+                    errorMapforsts.put("errorCode", sts.getCode());
+                    errorMapforsts.put("errorMessage", sts.getDescription());
+                    model.put("error", errorMapforsts);
                 }
 
                 if (hotelResponseTbo.getHotelResult() != null && !hotelResponseTbo.getHotelResult().isEmpty()) {
@@ -135,20 +129,19 @@ public class HotelService {
                         }
 
                         hotelMap.put("rooms", roomList);
+
                         hotelResultsList.add(hotelMap);
                     }
 
                     model.put("hotelResults", hotelResultsList);
 
-
                 }
-
-                System.out.println(model);
-
-                //
-                ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.writeValueAsString(model);
-
+                System.out.println(hotelResponseTbo);
+                //Template template = freemarkerConfiguration.getTemplate("hotelResults.ftl");
+                //String processedJson = FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
+                ObjectMapper objectMapper =  new ObjectMapper();
+                String processedJson = objectMapper.writeValueAsString(hotelResponseTbo);
+                return processedJson;
 
             } else {
                 return response.getStatusCode().toString();
