@@ -1,4 +1,4 @@
-package com.fastays.tbo_hotel_search.errormsg;
+package com.fastays.tbo_hotel_search.errorMsg;
 
 import lombok.Data;
 

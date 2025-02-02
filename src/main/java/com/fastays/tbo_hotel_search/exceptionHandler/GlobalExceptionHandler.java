@@ -1,6 +1,6 @@
 package com.fastays.tbo_hotel_search.exceptionHandler;
 
-import com.fastays.tbo_hotel_search.errormsg.ErrorResponse;
+import com.fastays.tbo_hotel_search.errorMsg.ErrorResponse;
 import com.fastays.tbo_hotel_search.exception.HotelSearchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
