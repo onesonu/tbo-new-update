@@ -1,7 +1,7 @@
 {
-    "status": {
-        "code": "${Status.code}",
-        "description": "${Status.description}"
+    "Status": {
+        "Code": "${Status.code}",
+        "Description": "${Status.description}"
     },
     <#if error??>
     "error": {
@@ -9,27 +9,27 @@
         "errorMessage": "${error.errorMessage}"
     }
     <#else>
-    "hotelResults": [
+    "HotelResults": [
         <#list hotelResults as hotel>
         {
-            "hotelCode": "${hotel.hotelCode}",
-            "currency": "${hotel.currency}",
-            "rooms": [
+            "HotelCode": "${hotel.hotelCode}",
+            "Currency": "${hotel.currency}",
+            "Rooms": [
                 <#list hotel.rooms as room>
                 {
-                    "name": "${room.name}",
-                    "bookingCode": "${room.bookingCode}",
-                    "inclusion": "${room.inclusion}",
-                    "dayRates": [
+                    "Name": "${room.name}",
+                    "BookingCode": "${room.bookingCode}",
+                    "Inclusion": "${room.inclusion}",
+                    "DayRates": [
                         <#list room.dayRates as dayRate>
                         {
-                            "basePrice": ${dayRate.basePrice}
+                            "BasePrice": ${dayRate.basePrice}
                         }<#if dayRate_has_next>,</#if>
                         </#list>
                     ],
-                    "totalFare": ${room.totalFare},
-                    "totalTax": ${room.totalTax},
-                    "roomPromotion": [
+                    "TotalFare": ${room.totalFare},
+                    "TotalTax": ${room.totalTax},
+                    "RoomPromotion": [
                         <#if room.roomPromotion?is_sequence>
                             <#list room.roomPromotion as promotion>
                             "${promotion}"<#if promotion_has_next>,</#if>
@@ -38,30 +38,30 @@
                             "${room.roomPromotion}"
                         </#if>
                     ],
-                    "cancellationPolicies": [
+                    "CancellationPolicies": [
                         <#list room.cancelPolicies as cancelPolicy>
                         {
-                            "index": "${cancelPolicy.index}",
-                            "fromDate": "${cancelPolicy.fromDate}",
-                            "chargeType": "${cancelPolicy.chargeType}",
-                            "cancellationCharge": ${cancelPolicy.cancellationCharge}
+                            "Index": "${cancelPolicy.index}",
+                            "FromDate": "${cancelPolicy.fromDate}",
+                            "ChargeType": "${cancelPolicy.chargeType}",
+                            "CancellationCharge": ${cancelPolicy.cancellationCharge}
                         }<#if cancelPolicy_has_next>,</#if>
                         </#list>
                     ],
-                    "mealType": "${room.mealType}",
-                    "isRefundable": ${room.isRefundable},
-                    "supplements": [
+                    "MealType": "${room.mealType}",
+                    "IsRefundable": ${room.isRefundable},
+                    "Supplements": [
                         <#list room.supplements as supplement>
                         {
-                            "index": ${supplement.index},
-                            "type": "${supplement.type}",
-                            "description": "${supplement.description}",
-                            "price": ${supplement.price},
-                            "currency": "${supplement.currency}"
+                            "Index": ${supplement.index},
+                            "Type": "${supplement.type}",
+                            "Description": "${supplement.description}",
+                            "Price": ${supplement.price},
+                            "Currency": "${supplement.currency}"
                         }<#if supplement_has_next>,</#if>
                         </#list>
                     ],
-                    "withTransfers": ${room.withTransfers}
+                    "WithTransfers": ${room.withTransfers}
                 }<#if room_has_next>,</#if>
                 </#list>
             ]
