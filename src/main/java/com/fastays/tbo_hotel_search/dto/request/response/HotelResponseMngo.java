@@ -14,40 +14,66 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HotelResponseMngo {
+
     @Id
     private String id;
-    @JsonProperty("HotelResult")
-    private List<HotelResult> hotelResult;
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class HotelResult {
+    @JsonProperty("hotelCode")
+    private String hotelCode;
 
-        @JsonProperty("hotelName")
-        private String hotelName;
+    @JsonProperty("hotelName")
+    private String hotelName;
 
-        @JsonProperty("rating")
-        private String rating;
+    @JsonProperty("address")
+    private String address;
 
-        @JsonProperty("location")
-        private String location;
+    @JsonProperty("attractions")
+    private List<Attraction> attractions;
 
-        @JsonProperty("amenities")
-        private List<String> amenities;
+    @JsonProperty("countryName")
+    private String countryName;
 
-        @JsonProperty("images")
-        private List<String> images;
+    @JsonProperty("countryCode")
+    private String countryCode;
 
-        @JsonProperty("attractions")
-        private List<Attraction> attractions;
+    @JsonProperty("description")
+    private String description;
 
-        @JsonProperty("hotelDescription")
-        private String hotelDescription;
+    @JsonProperty("faxNumber")
+    private String faxNumber;
 
-        @JsonProperty("map")
-        private String map;
-    }
+    @JsonProperty("hotelFacilities")
+    private List<String> hotelFacilities;
+
+    @JsonProperty("map")
+    private String map;
+
+    @JsonProperty("phoneNumber")
+    private String phoneNumber;
+
+    @JsonProperty("pinCode")
+    private String pinCode;
+
+    @JsonProperty("hotelWebsiteUrl")
+    private String hotelWebsiteUrl;
+
+    @JsonProperty("cityName")
+    private String cityName;
+
+    @JsonProperty("createdDate")
+    private String createdDate;
+
+    @JsonProperty("updatedDate")
+    private String updatedDate;
+
+    @JsonProperty("images")
+    private List<String> images;
+
+    @JsonProperty("rating")
+    private int rating;
+
+    @JsonProperty("_class")
+    private String _class;
 
     @Data
     @AllArgsConstructor
@@ -61,4 +87,3 @@ public class HotelResponseMngo {
         private double distanceInKm;
     }
 }
-

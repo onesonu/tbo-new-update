@@ -1,7 +1,9 @@
 package com.fastays.tbo_hotel_search.service;
 
 import com.fastays.tbo_hotel_search.dto.request.HotelRequest;
+import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseMngo;
 import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseTbo;
+import com.fastays.tbo_hotel_search.repository.MondoDBRepository;
 import freemarker.template.Template;
 import org.springframework.beans.factory.annotation.Value;
 import freemarker.template.Configuration;
@@ -23,10 +25,12 @@ public class HotelServiceImpl implements HotelService {
 
     private final RestTemplate restTemplate;
     private final Configuration freemarkerConfiguration;
+    private final MondoDBRepository mondoDBRepository;
 
-    public HotelServiceImpl(RestTemplate restTemplate, Configuration freemarkerConfiguration) {
+    public HotelServiceImpl(RestTemplate restTemplate, Configuration freemarkerConfiguration, MondoDBRepository mondoDBRepository) {
         this.restTemplate = restTemplate;
         this.freemarkerConfiguration = freemarkerConfiguration;
+        this.mondoDBRepository = mondoDBRepository;
     }
 
     @Override
@@ -40,11 +44,14 @@ public class HotelServiceImpl implements HotelService {
         ResponseEntity<HotelResponseTbo> response =
                 restTemplate.exchange(apiUrl, HttpMethod.POST, entity, HotelResponseTbo.class);
 
+
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             HotelResponseTbo hotelResponseTbo = response.getBody();
-            //calling the method which bind the data to FTL file
-            String ftl = mapToFtl(hotelResponseTbo);
-            return ftl;
+            // fetching data from mngo
+            List<HotelResponseMngo> fetched = fetchHotelUsingHotelCode(hotelResponseTbo);
+            maping(fetched);
+
+            return mapToFtl(hotelResponseTbo);
         } else {
             return response.getStatusCode().toString();
         }
@@ -52,6 +59,7 @@ public class HotelServiceImpl implements HotelService {
 
     // this code is for mapping to ftl file
     public String mapToFtl(HotelResponseTbo hotelResponseTbo) {
+
         try {
             Map<String, Object> model = new HashMap<>();
             HotelResponseTbo.Status sts = hotelResponseTbo.getStatus();
@@ -72,6 +80,7 @@ public class HotelServiceImpl implements HotelService {
                     hotelMap.put("hotelCode", hotelResult.getHotelCode());
                     hotelMap.put("currency", hotelResult.getCurrency());
                     //rooms
+
                     List<Map<String, Object>> roomList = new ArrayList<>();
                     for (HotelResponseTbo.Room room : hotelResult.getRooms()) {
                         Map<String, Object> roomMap = new HashMap<>();
@@ -140,7 +149,75 @@ public class HotelServiceImpl implements HotelService {
             String msg = e.getMessage();
             return "Error in processing response " + msg;
         }
+    }
 
+    //getting the hotelCodes
+    public List<HotelResponseMngo> fetchHotelUsingHotelCode(HotelResponseTbo hotelResponseTbo) {
+        //getting HotelCodes
+        List<String> hotelCode = new ArrayList<>();
+        for (HotelResponseTbo.HotelResult hotelResult : hotelResponseTbo.getHotelResult()) {
+            hotelCode.add(hotelResult.getHotelCode());
+        }
+        List<HotelResponseMngo> responseMngos = mondoDBRepository.findByHotelCodeIn(hotelCode);
+
+        List<HotelResponseMngo> fetchedDetails = new ArrayList<>();
+        for (HotelResponseMngo hotelResponseMngo : responseMngos) {
+            fetchedDetails.add(hotelResponseMngo);
+        }
+        return fetchedDetails;
+    }
+
+    public Map<String, Object> maping(List<HotelResponseMngo> fetched) {
+        Map<String, Object> modelformongo = new HashMap<>();
+        List<String> hotelIds = fetched.stream().map(HotelResponseMngo::getId).toList();
+
+        List<String> hotelCodes = fetched.stream().map(HotelResponseMngo::getHotelCode).toList();
+        List<String> hotelName = fetched.stream().map(HotelResponseMngo::getHotelName).toList();
+        List<String> address = fetched.stream().map(HotelResponseMngo::getAddress).toList();
+
+        List<List<HotelResponseMngo.Attraction>> attractions = fetched.stream().map(HotelResponseMngo::getAttractions).toList();
+        List<String> location = attractions.stream().flatMap(p -> p.stream().map(HotelResponseMngo.Attraction::getLocationName)).toList();
+        List<Double> distance = attractions.stream().flatMap(p -> p.stream().map(HotelResponseMngo.Attraction::getDistanceInKm)).toList();
+
+        List<String> countryName = fetched.stream().map(HotelResponseMngo::getCountryName).toList();
+        List<String> countryCode = fetched.stream().map(HotelResponseMngo::getCountryCode).toList();
+        List<String> description = fetched.stream().map(HotelResponseMngo::getDescription).toList();
+        List<String> faxNumber = fetched.stream().map(HotelResponseMngo::getFaxNumber).toList();
+
+        List<List<String>> facilities = fetched.stream().map(HotelResponseMngo::getHotelFacilities).toList(); //list
+        List<String> map = fetched.stream().map(HotelResponseMngo::getMap).toList();
+        List<String> phoneNo = fetched.stream().map(HotelResponseMngo::getPhoneNumber).toList();
+        List<String> pinCode = fetched.stream().map(HotelResponseMngo::getPinCode).toList();
+        List<String> hotelWebsiteUrl = fetched.stream().map(HotelResponseMngo::getHotelWebsiteUrl).toList();
+        List<String> cityName = fetched.stream().map(HotelResponseMngo::getCityName).toList();
+        List<String> createDate = fetched.stream().map(HotelResponseMngo::getCreatedDate).toList();
+        List<String> updateDate = fetched.stream().map(HotelResponseMngo::getUpdatedDate).toList();
+
+        List<List<String>> images = fetched.stream().map(HotelResponseMngo::getImages).toList(); //list
+        List<Integer> rating = fetched.stream().map(HotelResponseMngo::getRating).toList();
+
+        modelformongo.put("hotelIds", hotelIds);
+        modelformongo.put("hotelCode", hotelCodes);
+        modelformongo.put("hotelName", hotelName);
+        modelformongo.put("address", address);
+        modelformongo.put("location", location);
+        modelformongo.put("distance", distance);
+        modelformongo.put("countryName", countryName);
+        modelformongo.put("countryCode", countryCode);
+        modelformongo.put("description", description);
+        modelformongo.put("faxNumber", faxNumber);
+        modelformongo.put("facilities", facilities);
+        modelformongo.put("map", map);
+        modelformongo.put("phoneNo", phoneNo);
+        modelformongo.put("pinCode", pinCode);
+        modelformongo.put("hotelWebsiteUrl", hotelWebsiteUrl);
+        modelformongo.put("cityName", cityName);
+        modelformongo.put("createDate", createDate);
+        modelformongo.put("updateDate", updateDate);
+        modelformongo.put("images", images);
+        modelformongo.put("rating", rating);
+        System.out.println(modelformongo);
+        return modelformongo;
     }
 
 
