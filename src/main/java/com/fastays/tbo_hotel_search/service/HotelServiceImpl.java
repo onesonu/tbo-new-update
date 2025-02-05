@@ -57,7 +57,7 @@ public class HotelServiceImpl implements HotelService {
         }
     }
 
-    // this code is for mapping to ftl file
+    // this code is for mapping to ftl file with null checks
     public String mapToFtl(HotelResponseTbo hotelResponseTbo) {
 
         try {
