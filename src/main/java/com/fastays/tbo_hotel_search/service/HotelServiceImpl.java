@@ -50,9 +50,9 @@ public class HotelServiceImpl implements HotelService {
             // fetching data from mngo
             List<HotelResponseMngo> fetched = fetchHotelUsingHotelCode(hotelResponseTbo);
 
-            //return mapToFtlTbo(hotelResponseTbo);
-           // return maoToFtlMngo(fetched);
-            return combineResponse(hotelResponseTbo, fetched);
+           // return mapToFtlTbo(hotelResponseTbo);
+            return mapToFtlMngo(fetched);
+            // return combineResponse(hotelResponseTbo, fetched);
 
         } else {
             return response.getStatusCode().toString();
@@ -154,7 +154,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
 
-    public String maoToFtlMngo(List<HotelResponseMngo> fetched) {
+    public String mapToFtlMngo(List<HotelResponseMngo> fetched) {
         Map<String, Object> modelMngo = new HashMap<>();
         if (!fetched.isEmpty()) {
             try {
@@ -205,18 +205,18 @@ public class HotelServiceImpl implements HotelService {
 
     //getting the hotelFrom mongo
     public List<HotelResponseMngo> fetchHotelUsingHotelCode(HotelResponseTbo hotelResponseTbo) {
+        List<HotelResponseMngo> responseMngos;
         //getting HotelCodes
         List<String> hotelCode = new ArrayList<>();
         for (HotelResponseTbo.HotelResult hotelResult : hotelResponseTbo.getHotelResult()) {
             hotelCode.add(hotelResult.getHotelCode());
         }
-        List<HotelResponseMngo> responseMngos = mondoDBRepository.findByHotelCodeIn(hotelCode);
-
-        List<HotelResponseMngo> fetchedDetails = new ArrayList<>();
-        for (HotelResponseMngo hotelResponseMngo : responseMngos) {
-            fetchedDetails.add(hotelResponseMngo);
+        if (hotelCode.size()==1){
+            responseMngos = mondoDBRepository.findAllByHotelCode( hotelCode.getFirst());
+        }else {
+            responseMngos = mondoDBRepository.findByHotelCodeIn(hotelCode);
         }
-        return fetchedDetails;
+        return responseMngos;
     }
 
 
