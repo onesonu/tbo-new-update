@@ -1,5 +1,6 @@
 package com.fastays.tbo_hotel_search.service;
 
+import com.fastays.tbo_hotel_search.dto.request.CombineResponseDTO;
 import com.fastays.tbo_hotel_search.dto.request.HotelRequest;
 import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseMngo;
 import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseTbo;
@@ -48,11 +49,11 @@ public class HotelServiceImpl implements HotelService {
             List<HotelResponseMngo> fetched = new ArrayList<>();
             if (hotelResponseTbo.getHotelResult() != null && !hotelResponseTbo.getHotelResult().isEmpty()) {
                 fetched = fetchHotelUsingHotelCode(hotelResponseTbo);
-
             }
-            // return mapToFtlMngo(fetched);
-            return mapToFtlTbo(hotelResponseTbo);
-            //  return combineResponse(hotelResponseTbo, fetched);
+
+            return mapToFtlMngo(fetched);
+            //return mapToFtlTbo(hotelResponseTbo);
+            //return combineResponse(hotelResponseTbo, fetched);
 
         } else {
             return response.getStatusCode().toString();
@@ -71,52 +72,19 @@ public class HotelServiceImpl implements HotelService {
     }
 
     public String mapToFtlMngo(List<HotelResponseMngo> fetched) {
-        Map<String, Object> modelMngo = new HashMap<>();
         if (!fetched.isEmpty()) {
             try {
-                List<Map<String, Object>> hotelResultsList = new ArrayList<>();
                 Map<String, Object> mapingToModel = new HashMap<>();
-                for (HotelResponseMngo hotelResponseMngo : fetched) {
-                    mapingToModel.put("id", hotelResponseMngo.getId());
-                    mapingToModel.put("hotelCode", hotelResponseMngo.getHotelCode());
-                    mapingToModel.put("hotelName", hotelResponseMngo.getHotelName());
-                    mapingToModel.put("address", hotelResponseMngo.getAddress());
+                mapingToModel.put("results", fetched);
 
-                    List<Map<String, Object>> attractionsLst = new ArrayList<>();
-                    for (HotelResponseMngo.Attraction attraction : hotelResponseMngo.getAttractions()) {
-                        Map<String, Object> attractionMap = new HashMap<>();
-                        attractionMap.put("location", attraction.getLocationName());
-                        attractionMap.put("distanceInKm", attraction.getDistanceInKm());
-                        attractionsLst.add(attractionMap);
-                    }
-                    mapingToModel.put("attractions", attractionsLst);
-                    mapingToModel.put("countryName", hotelResponseMngo.getCountryName());
-                    mapingToModel.put("countryCode", hotelResponseMngo.getCountryCode());
-                    mapingToModel.put("description", hotelResponseMngo.getDescription());
-                    mapingToModel.put("faxNumber", hotelResponseMngo.getFaxNumber());
-                    mapingToModel.put("facilities", hotelResponseMngo.getHotelFacilities() != null ? String.join(", ", hotelResponseMngo.getHotelFacilities()) : "N/A");
-                    mapingToModel.put("map", hotelResponseMngo.getMap());
-                    mapingToModel.put("phoneNumber", hotelResponseMngo.getPhoneNumber());
-                    mapingToModel.put("pinCode", hotelResponseMngo.getPinCode());
-                    mapingToModel.put("websiteUrl", hotelResponseMngo.getHotelWebsiteUrl());
-                    mapingToModel.put("cityName", hotelResponseMngo.getCityName());
-                    mapingToModel.put("createDate", hotelResponseMngo.getCreatedDate());
-                    mapingToModel.put("updateDate", hotelResponseMngo.getUpdatedDate());
-                    mapingToModel.put("images", hotelResponseMngo.getImages() != null ? String.join(", ", hotelResponseMngo.getImages()) : "N/A");
-                    mapingToModel.put("rating", hotelResponseMngo.getRating());
-                    hotelResultsList.add(mapingToModel);
-
-                    modelMngo.put("HotelResults", hotelResultsList);
-                }
                 Template template = freemarkerConfiguration.getTemplate("hotelResponseMngo.ftl");
-                String processedTemp = FreeMarkerTemplateUtils.processTemplateIntoString(template, modelMngo);
-                return processedTemp;
+                return FreeMarkerTemplateUtils.processTemplateIntoString(template, mapingToModel);
             } catch (Exception e) {
                 String msg = e.getMessage();
                 return "Error in processing response " + msg;
             }
         }
-        return "no returns form mongo ";
+        return "No Response From MongoDB ";
     }
 
     //Getting Hotels from MongoDb after giving hotelCode.
@@ -137,7 +105,36 @@ public class HotelServiceImpl implements HotelService {
 
     //
     public String combineResponse(HotelResponseTbo hotelResponseTbo, List<HotelResponseMngo> fetched) {
-        return null;
+        CombineResponseDTO combineResponseDTO = new CombineResponseDTO();
+        if (!fetched.isEmpty()) {
+            for (HotelResponseMngo hotelResponseMngo : fetched) {
+                combineResponseDTO.setId(hotelResponseMngo.getId());
+                combineResponseDTO.setHotelCode(hotelResponseMngo.getHotelCode());
+                combineResponseDTO.setHotelName(hotelResponseMngo.getHotelName());
+                combineResponseDTO.setAddress(hotelResponseMngo.getAddress());
+                combineResponseDTO.setAttractions(hotelResponseMngo.getAttractions());
+                combineResponseDTO.setCountryName(hotelResponseMngo.getCountryName());
+                combineResponseDTO.setCountryCode(hotelResponseMngo.getCountryCode());
+                combineResponseDTO.setDescription(hotelResponseMngo.getDescription());
+                combineResponseDTO.setFaxNumber(hotelResponseMngo.getFaxNumber());
+                combineResponseDTO.setHotelFacilities(hotelResponseMngo.getHotelFacilities());
+                combineResponseDTO.setMap(hotelResponseMngo.getMap());
+                combineResponseDTO.setPhoneNumber(hotelResponseMngo.getPhoneNumber());
+                combineResponseDTO.setPinCode(hotelResponseMngo.getPinCode());
+                combineResponseDTO.setHotelWebsiteUrl(hotelResponseMngo.getHotelWebsiteUrl());
+                combineResponseDTO.setCityName(hotelResponseMngo.getCityName());
+                combineResponseDTO.setCreatedDate(hotelResponseMngo.getCreatedDate());
+                combineResponseDTO.setUpdatedDate(hotelResponseMngo.getUpdatedDate());
+                combineResponseDTO.setImages(hotelResponseMngo.getImages());
+                combineResponseDTO.setRating(hotelResponseMngo.getRating());
+                combineResponseDTO.set_class(hotelResponseMngo.get_class());
+            }
+            combineResponseDTO.setStatus(hotelResponseTbo.getStatus());
+            combineResponseDTO.setHotelResult(hotelResponseTbo.getHotelResult());
+        }
+        System.out.println(combineResponseDTO);
+
+        return "sonu";
 
     }
 }
