@@ -1,6 +1,5 @@
 package com.fastays.tbo_hotel_search.service;
 
-import com.fastays.tbo_hotel_search.dto.request.CombineResponseDTO;
 import com.fastays.tbo_hotel_search.dto.request.HotelRequest;
 import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseMngo;
 import com.fastays.tbo_hotel_search.dto.request.response.HotelResponseTbo;
@@ -50,14 +49,29 @@ public class HotelServiceImpl implements HotelService {
             if (hotelResponseTbo.getHotelResult() != null && !hotelResponseTbo.getHotelResult().isEmpty()) {
                 fetched = fetchHotelUsingHotelCode(hotelResponseTbo);
             }
-
-            return mapToFtlMngo(fetched);
             //return mapToFtlTbo(hotelResponseTbo);
-            //return combineResponse(hotelResponseTbo, fetched);
+            //return mapToFtlMngo(fetched);
+            return combineResponse(hotelResponseTbo, fetched);
 
         } else {
             return response.getStatusCode().toString();
         }
+    }
+
+    //Getting Hotels from MongoDb after giving hotelCode.
+    public List<HotelResponseMngo> fetchHotelUsingHotelCode(HotelResponseTbo hotelResponseTbo) {
+        List<HotelResponseMngo> responseMngos;
+        //getting HotelCodes
+        List<String> hotelCode = new ArrayList<>();
+        for (HotelResponseTbo.HotelResult hotelResult : hotelResponseTbo.getHotelResult()) {
+            hotelCode.add(hotelResult.getHotelCode());
+        }
+        if (hotelCode.size() == 1) {
+            responseMngos = mongoDbRepository.findAllByHotelCode(hotelCode.getFirst());
+        } else {
+            responseMngos = mongoDbRepository.findByHotelCodeIn(hotelCode);
+        }
+        return responseMngos;
     }
 
     // Mapping to FTL only Tbo Responses
@@ -87,55 +101,22 @@ public class HotelServiceImpl implements HotelService {
         return "No Response From MongoDB ";
     }
 
-    //Getting Hotels from MongoDb after giving hotelCode.
-    public List<HotelResponseMngo> fetchHotelUsingHotelCode(HotelResponseTbo hotelResponseTbo) {
-        List<HotelResponseMngo> responseMngos;
-        //getting HotelCodes
-        List<String> hotelCode = new ArrayList<>();
-        for (HotelResponseTbo.HotelResult hotelResult : hotelResponseTbo.getHotelResult()) {
-            hotelCode.add(hotelResult.getHotelCode());
-        }
-        if (hotelCode.size() == 1) {
-            responseMngos = mongoDbRepository.findAllByHotelCode(hotelCode.getFirst());
-        } else {
-            responseMngos = mongoDbRepository.findByHotelCodeIn(hotelCode);
-        }
-        return responseMngos;
-    }
-
-    //
+    // mapping Both the Response
     public String combineResponse(HotelResponseTbo hotelResponseTbo, List<HotelResponseMngo> fetched) {
-        CombineResponseDTO combineResponseDTO = new CombineResponseDTO();
         if (!fetched.isEmpty()) {
-            for (HotelResponseMngo hotelResponseMngo : fetched) {
-                combineResponseDTO.setId(hotelResponseMngo.getId());
-                combineResponseDTO.setHotelCode(hotelResponseMngo.getHotelCode());
-                combineResponseDTO.setHotelName(hotelResponseMngo.getHotelName());
-                combineResponseDTO.setAddress(hotelResponseMngo.getAddress());
-                combineResponseDTO.setAttractions(hotelResponseMngo.getAttractions());
-                combineResponseDTO.setCountryName(hotelResponseMngo.getCountryName());
-                combineResponseDTO.setCountryCode(hotelResponseMngo.getCountryCode());
-                combineResponseDTO.setDescription(hotelResponseMngo.getDescription());
-                combineResponseDTO.setFaxNumber(hotelResponseMngo.getFaxNumber());
-                combineResponseDTO.setHotelFacilities(hotelResponseMngo.getHotelFacilities());
-                combineResponseDTO.setMap(hotelResponseMngo.getMap());
-                combineResponseDTO.setPhoneNumber(hotelResponseMngo.getPhoneNumber());
-                combineResponseDTO.setPinCode(hotelResponseMngo.getPinCode());
-                combineResponseDTO.setHotelWebsiteUrl(hotelResponseMngo.getHotelWebsiteUrl());
-                combineResponseDTO.setCityName(hotelResponseMngo.getCityName());
-                combineResponseDTO.setCreatedDate(hotelResponseMngo.getCreatedDate());
-                combineResponseDTO.setUpdatedDate(hotelResponseMngo.getUpdatedDate());
-                combineResponseDTO.setImages(hotelResponseMngo.getImages());
-                combineResponseDTO.setRating(hotelResponseMngo.getRating());
-                combineResponseDTO.set_class(hotelResponseMngo.get_class());
+            try {
+                Map<String, Object> mapingToModel = new HashMap<>();
+                mapingToModel.put("resultsMngo", fetched);
+                mapingToModel.put("resultsTbo", hotelResponseTbo);
+
+                Template template = freemarkerConfiguration.getTemplate("combineResponse.ftl");
+                return FreeMarkerTemplateUtils.processTemplateIntoString(template, mapingToModel);
+            } catch (Exception e) {
+                String msg = e.getMessage();
+                return "Error in processing response " + msg;
             }
-            combineResponseDTO.setStatus(hotelResponseTbo.getStatus());
-            combineResponseDTO.setHotelResult(hotelResponseTbo.getHotelResult());
         }
-        System.out.println(combineResponseDTO);
-
-        return "sonu";
-
+        return "Error in fetching the data and Mapping the Combine Response ";
     }
 }
 

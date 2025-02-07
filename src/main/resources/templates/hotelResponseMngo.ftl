@@ -10,23 +10,21 @@
     "CountryCode": "${hotel.countryCode}",
     "Description": "${hotel.description}",
     "FaxNumber": "${hotel.faxNumber}",
-    "Facilities": <#if hotel.facilities?? && hotel.facilities?size gt 0>
-    "${hotel.facilities}",</#if>
+    "Facilities": <#if hotel.hotelFacilities?? && hotel.hotelFacilities?size gt 0>"${hotel.hotelFacilities?join(", ")}", <#else> "N/A", </#if>
     "Map": "${hotel.map}",
     "PhoneNumber": "${hotel.phoneNumber}",
     "PinCode": "${hotel.pinCode}",
-    "WebsiteUrl": <#if hotel.websiteUrl?? && hotel.websiteUrl?size gt 0>
-    "${hotel.websiteUrl}", </#if>
+    "WebsiteUrl": <#if hotel.hotelWebsiteUrl?? && hotel.hotelWebsiteUrl?has_content>"${hotel.hotelWebsiteUrl}", <#else> "N/A", </#if>
     "CityName": "${hotel.cityName}",
-    "CreateDate": <#if hotel.createDate?? && hotel.createDate?size gt 0>"${hotel.createDate}",</#if>
-    "UpdateDate": <#if hotel.updateDate?? && hotel.updateDate?size gt 0>"${hotel.updateDate}",</#if>
+    "CreateDate": <#if hotel.createdDate?? && hotel.createdDate?has_content>"${hotel.createdDate}", <#else> "N/A",</#if>
+    "UpdateDate": <#if hotel.updatedDate?? && hotel.updatedDate?has_content>"${hotel.updatedDate}", <#else> "N/A",</#if>
     "Images": [
     <#if hotel.images?? && hotel.images?size gt 0>
         <#list hotel.images as image>
             "${image}"<#if image_has_next>,</#if>
         </#list>
     </#if>
-    ]
+    ],
     "Rating": "${hotel.rating}",
     "Attractions": [
     <#if hotel.attractions?? && hotel.attractions?size gt 0>
