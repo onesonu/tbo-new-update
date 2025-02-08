@@ -98,12 +98,12 @@ public class HotelServiceImpl implements HotelService {
                 return "Error in processing response " + msg;
             }
         }
-        return "No Response From MongoDB ";
+        return "No Hotels Fetching From MongoDB ";
     }
 
     // mapping Both the Response
     public String combineResponse(HotelResponseTbo hotelResponseTbo, List<HotelResponseMngo> fetched) {
-        if (!fetched.isEmpty()) {
+        if (!fetched.isEmpty() && hotelResponseTbo.getHotelResult() != null) {
             try {
                 Map<String, Object> mapingToModel = new HashMap<>();
                 mapingToModel.put("resultsMngo", fetched);
@@ -115,8 +115,10 @@ public class HotelServiceImpl implements HotelService {
                 String msg = e.getMessage();
                 return "Error in processing response " + msg;
             }
+        } else if (hotelResponseTbo.getStatus() != null) {
+           return hotelResponseTbo.getStatus().toString();
         }
-        return "Error in fetching the data and Mapping the Combine Response ";
+        return "No Hotels Are available in given Criteria  ";
     }
 }
 
